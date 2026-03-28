@@ -1,0 +1,182 @@
+:root {
+  --bg: #161b26;
+  --surface: rgba(26, 32, 44, 0.76);
+  --surface-strong: rgba(33, 40, 54, 0.92);
+  --text: #e6e4de;
+  --muted: #9aa3b5;
+  --line: rgba(182, 194, 214, 0.16);
+  --accent: #b47d68;
+  --accent-deep: #c8a58e;
+  --shadow: 0 24px 60px rgba(3, 6, 12, 0.34);
+  --radius-xl: 28px;
+  --radius-lg: 22px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--text);
+  font-family: "Manrope", sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(180, 125, 104, 0.18), transparent 32%),
+    radial-gradient(circle at right 20%, rgba(69, 92, 128, 0.18), transparent 28%),
+    linear-gradient(135deg, #10151f 0%, #171d29 52%, #111824 100%);
+}
+
+.game-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 20px 48px;
+}
+
+.panel {
+  background: var(--surface);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(18px);
+}
+
+.page-header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 26px;
+}
+
+.eyebrow {
+  margin: 0 0 10px;
+  font-size: 0.77rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent-deep);
+  font-weight: 800;
+}
+
+.page-header h1 {
+  margin: 0;
+}
+
+.page-header h1 {
+  font-family: "Fraunces", serif;
+  font-size: clamp(2.4rem, 6vw, 4.2rem);
+  letter-spacing: -0.03em;
+}
+
+.page-copy,
+.playbar-text {
+  color: var(--muted);
+}
+
+.page-copy {
+  margin: 14px 0 0;
+  max-width: 40rem;
+  line-height: 1.7;
+}
+
+.back-link,
+.action-button,
+.mobile-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.05);
+  text-decoration: none;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    background 160ms ease,
+    border-color 160ms ease;
+}
+
+.back-link:hover,
+.back-link:focus-visible,
+.action-button:hover,
+.action-button:focus-visible,
+.mobile-button:hover,
+.mobile-button:focus-visible {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(200, 165, 142, 0.42);
+}
+
+.play-panel {
+  margin-top: 18px;
+  padding: 22px;
+}
+
+.playbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.playbar-text {
+  margin: 0;
+  line-height: 1.7;
+}
+
+#shooterGame {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background:
+    radial-gradient(circle at top, rgba(95, 116, 161, 0.18), transparent 35%),
+    linear-gradient(180deg, #0c1119 0%, #111827 55%, #0a0e15 100%);
+  touch-action: none;
+}
+
+.mobile-controls {
+  display: none;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.mobile-button {
+  min-height: 56px;
+}
+
+.mobile-button-fire {
+  background: linear-gradient(135deg, var(--accent-deep), var(--accent));
+  color: #141820;
+}
+
+@media (max-width: 920px) {
+  .page-header,
+  .playbar {
+    flex-direction: column;
+    align-items: start;
+  }
+}
+
+@media (max-width: 640px) {
+  .game-page {
+    padding: 18px 14px 32px;
+  }
+
+  .page-header,
+  .play-panel {
+    padding: 18px;
+  }
+
+  .mobile-controls {
+    display: grid;
+  }
+}

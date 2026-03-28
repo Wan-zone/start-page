@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Shooter mini game for Wan start page." />
+    <title>打飞机 | Wan Start Page</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./shooter.css" />
+  </head>
+  <body>
+    <main class="game-page">
+      <header class="page-header panel">
+        <div>
+          <p class="eyebrow">MINI GAME / SHOOTER</p>
+          <h1>打飞机</h1>
+          <p class="page-copy">桌面端可用方向键或 `A/D` 移动、`Space` 发射；手机端可用屏幕下方按钮控制。分数、生命、挑战和状态会直接显示在游戏画面里。</p>
+        </div>
+        <a class="back-link" href="../index.html">返回主页</a>
+      </header>
+
+      <section class="play-panel panel">
+        <div class="playbar">
+          <div class="playbar-copy">
+            <p class="eyebrow">ARENA</p>
+            <p class="playbar-text">先做一个完整可玩的版本，后面可以继续加敌机种类、Boss、道具和难度模式。</p>
+          </div>
+          <button id="gameStartButton" class="action-button" type="button">开始 / 重新开始</button>
+        </div>
+
+        <canvas id="shooterGame" width="900" height="520" aria-label="打飞机小游戏"></canvas>
+
+        <div class="mobile-controls">
+          <button class="mobile-button" data-control="left" type="button">左移</button>
+          <button class="mobile-button mobile-button-fire" data-control="fire" type="button">开火</button>
+          <button class="mobile-button" data-control="right" type="button">右移</button>
+        </div>
+      </section>
+    </main>
+
+    <script src="./shooter.js"></script>
+  </body>
+</html>

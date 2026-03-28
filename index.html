@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="A personal start page for daily browsing, focus, and quick launch."
+    />
+    <title>Wan Start Page</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <div class="ambient ambient-left"></div>
+      <div class="ambient ambient-right"></div>
+
+      <main class="layout">
+        <section class="hero panel">
+          <div class="hero-split">
+            <section class="hero-copy-block">
+              <p class="eyebrow">WAN / START PAGE</p>
+              <h1>少切换，少分心，先把今天真正重要的事推起来。</h1>
+              <p class="hero-copy">
+                这是你的个人起始页。上面放一句提醒自己进入状态的话，右侧直接用搜索开始当天的第一步。
+              </p>
+              <div class="hero-actions">
+                <button id="refreshQuotesButton" class="refresh-button" type="button">换一组</button>
+              </div>
+
+              <div class="slogan-stack">
+                <article class="slogan-chip">
+                  <span class="chip-label">随机一句</span>
+                  <strong id="primaryQuoteText" class="chip-main">进入工作状态</strong>
+                  <span id="primaryQuoteSource" class="chip-meta">语录加载中</span>
+                </article>
+              </div>
+            </section>
+
+            <section class="search-hub">
+              <div class="search-panel panel-inner">
+                <p class="eyebrow">SEARCH</p>
+                <h2>直接搜索</h2>
+                <p class="section-copy search-copy">分别走 Google、Bing、Baidu，避免在页面里再做额外跳转。</p>
+
+                <div class="engine-stack">
+                  <form class="engine-form" data-engine="google">
+                    <label class="engine-label" for="googleSearch">Google</label>
+                    <div class="engine-row">
+                      <input id="googleSearch" name="q" type="search" placeholder="Search with Google" autocomplete="off" />
+                      <button type="submit">Go</button>
+                    </div>
+                  </form>
+
+                  <form class="engine-form" data-engine="bing">
+                    <label class="engine-label" for="bingSearch">Bing</label>
+                    <div class="engine-row">
+                      <input id="bingSearch" name="q" type="search" placeholder="Search with Bing" autocomplete="off" />
+                      <button type="submit">Go</button>
+                    </div>
+                  </form>
+
+                  <form class="engine-form" data-engine="baidu">
+                    <label class="engine-label" for="baiduSearch">Baidu</label>
+                    <div class="engine-row">
+                      <input id="baiduSearch" name="q" type="search" placeholder="使用百度搜索" autocomplete="off" />
+                      <button type="submit">Go</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="widget-section">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">WIDGETS</p>
+              <h2>先保留最小功能</h2>
+            </div>
+            <p class="section-copy">先保留时间和少量高频入口，后面再一点点往上加。</p>
+          </div>
+
+          <div class="widget-grid">
+            <article class="stat-card widget-card image-card">
+              <div class="image-card-head">
+                <span class="stat-label">图片实验</span>
+                <button id="nextImageButton" class="refresh-button" type="button">换图片</button>
+              </div>
+              <div class="image-frame">
+                <img id="galleryImage" src="./assets/gallery/hero-reference.png" alt="Start page gallery reference" />
+              </div>
+              <span id="galleryCaption" class="stat-meta">先在这里验证图片路径、比例和整体气质。</span>
+            </article>
+
+            <article class="stat-card widget-card">
+              <span class="stat-label">本地时间</span>
+              <strong id="clock" class="clock">00:00</strong>
+              <span id="dateText" class="stat-meta">加载中</span>
+            </article>
+
+            <article class="stat-card widget-card shortcut-card">
+              <span class="stat-label">快捷访问</span>
+              <div class="shortcut-list">
+                <a class="shortcut-link" href="https://chatgpt.com/" target="_blank" rel="noreferrer">GPT</a>
+                <a class="shortcut-link" href="https://gemini.google.com/" target="_blank" rel="noreferrer">Gemini</a>
+                <a class="shortcut-link" href="https://github.com/" target="_blank" rel="noreferrer">GitHub</a>
+              </div>
+              <span class="stat-meta">保留少量真正高频的入口。</span>
+            </article>
+          </div>
+        </section>
+
+        <section class="game-section">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">MINI GAME</p>
+              <h2>小游戏入口</h2>
+            </div>
+            <p class="section-copy">首页这里只放入口，具体游戏放到独立子页，后面继续加别的也不会把主页弄乱。</p>
+          </div>
+
+          <div class="game-links-grid">
+            <a class="game-link-card panel" href="./games/shooter.html">
+              <span class="stat-label">AVAILABLE</span>
+              <h3 class="game-link-title">打飞机</h3>
+              <p class="game-link-copy">独立页面版本，支持桌面键盘、手机触控、计分、最高分和挑战目标。</p>
+            </a>
+
+            <article class="game-link-card panel game-link-card-muted">
+              <span class="stat-label">COMING NEXT</span>
+              <h3 class="game-link-title">下一个小游戏</h3>
+              <p class="game-link-copy">这里先留一个位置，后面可以继续挂贪吃蛇、2048、躲避球之类的小东西。</p>
+            </article>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
