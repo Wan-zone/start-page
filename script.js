@@ -72,12 +72,6 @@ const QUICK_LINKS = [
   },
 ];
 
-const FALLBACK_QUOTES = [
-  { text: "先做关键事，再看噪音。", source: "默认提醒" },
-  { text: "开始比完美更重要。", source: "默认提醒" },
-  { text: "把复杂问题拆成今天能动的一步。", source: "默认提醒" },
-];
-
 const FOCUS_POOLS = {
   morning: [
     {
@@ -150,9 +144,7 @@ const focusMeta = document.getElementById("focusMeta");
 const focusCard = document.getElementById("focusCard");
 const clockText = document.getElementById("clockText");
 const dateText = document.getElementById("dateText");
-const quoteCard = document.getElementById("quoteCard");
-const quoteText = document.getElementById("quoteText");
-const quoteSource = document.getElementById("quoteSource");
+const storyCard = document.getElementById("storyCard");
 const searchPanel = document.getElementById("searchSection");
 const searchForm = document.getElementById("searchForm");
 const searchInput = document.getElementById("searchInput");
@@ -177,7 +169,6 @@ const sectionTargets = Array.from(railDots)
   .filter(Boolean);
 
 let activeEngine = "google";
-let quotePool = FALLBACK_QUOTES;
 let galleryImages = FALLBACK_GALLERY_IMAGES;
 let currentImageIndex = 0;
 let detailedClockEnabled = false;
@@ -405,31 +396,8 @@ function renderQuickLinks() {
   quickLinksGrid.innerHTML = cards;
 }
 
-function pickRandomQuote() {
-  return quotePool[Math.floor(Math.random() * quotePool.length)];
-}
-
-function renderQuote() {
-  const item = pickRandomQuote();
-  quoteText.textContent = item.text;
-  quoteSource.textContent = item.source;
-}
-
-async function loadQuotes() {
-  try {
-    const response = await fetch("./data/quotes.json", { cache: "no-store" });
-    if (!response.ok) {
-      throw new Error("Failed to load quotes");
-    }
-    const data = await response.json();
-    if (Array.isArray(data) && data.length > 0) {
-      quotePool = data;
-    }
-  } catch (error) {
-    quotePool = FALLBACK_QUOTES;
-  }
-
-  renderQuote();
+function openStoriesPage() {
+  window.location.href = "./store/index.html";
 }
 
 async function loadMascotQuotes() {
@@ -995,7 +963,6 @@ function createSegmentControl(container, highlight, buttons, onSelect) {
 initializeTheme();
 renderQuickLinks();
 updateClock();
-loadQuotes();
 loadMascotQuotes();
 loadGalleryManifest();
 initializeRipples();
@@ -1023,8 +990,8 @@ railDots.forEach((button) => {
 searchForm.addEventListener("submit", handleSearch);
 searchInput.addEventListener("keydown", markStrongSearchFeedback);
 searchInput.addEventListener("input", triggerSearchInputFeedback);
-quoteCard.addEventListener("click", renderQuote);
-quoteCard.addEventListener("keydown", (event) => handleInteractiveKeydown(event, renderQuote));
+storyCard.addEventListener("click", openStoriesPage);
+storyCard.addEventListener("keydown", (event) => handleInteractiveKeydown(event, openStoriesPage));
 timeCard.addEventListener("click", () => {
   detailedClockEnabled = !detailedClockEnabled;
   updateClock();
