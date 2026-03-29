@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="书库页 for Wan Start Page." />
+    <title>书库 | Wan Start Page</title>
+    <link rel="icon" type="image/svg+xml" href="../assets/icons/favicon.svg" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="books-page">
+      <header class="books-header glass-panel">
+        <div>
+          <p class="eyebrow" id="booksHeaderEyebrow">BOOKS</p>
+          <h1 id="booksHeaderTitle">书库</h1>
+          <p class="books-copy" id="booksHeaderCopy">这里后面用来放电子书、段落池和阅读器相关内容。当前先搭最小框架。</p>
+        </div>
+        <div class="books-actions">
+          <a class="books-link" id="booksBackHomeLink" href="../index.html">返回主页</a>
+        </div>
+      </header>
+
+      <section class="books-library-stage glass-panel">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow" id="booksLibraryEyebrow">LIBRARY</p>
+              <h2 id="booksLibraryTitle">全部书目</h2>
+            </div>
+          </div>
+          <div id="booksList" class="books-list"></div>
+      </section>
+    </main>
+
+    <div id="bookPreviewModal" class="book-preview-modal" aria-hidden="true">
+      <div class="book-preview-backdrop" id="bookPreviewBackdrop"></div>
+      <section class="book-preview-panel glass-panel" role="dialog" aria-modal="true" aria-labelledby="booksTitle">
+        <button id="bookPreviewClose" class="book-preview-close" type="button" aria-label="关闭书籍预览">关闭</button>
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow" id="booksPreviewEyebrow">PREVIEW</p>
+            <h2 id="booksTitle">加载中</h2>
+          </div>
+        </div>
+        <p id="booksSummary" class="books-summary">正在读取书库信息。</p>
+        <div id="booksMeta" class="books-meta"></div>
+        <div id="booksContent" class="books-content"></div>
+        <a id="booksReaderLink" class="books-reader-link" href="./reader.html">进入阅读页</a>
+      </section>
+    </div>
+
+    <script src="./script.js"></script>
+  </body>
+</html>

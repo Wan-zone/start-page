@@ -3,8 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="打飞机文字交互小游戏" />
-    <title>打飞机 · 文字交互</title>
+    <meta id="pageDescriptionMeta" name="description" content="" />
+    <title id="pageTitleNode"></title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet" />
@@ -16,81 +16,104 @@
     <div class="club-bg-layer club-bg-layer-b" aria-hidden="true"></div>
     <div class="club-strobe-layer" aria-hidden="true"></div>
     <div class="club-beam-layer club-beam-layer-a" aria-hidden="true"></div>
+    <div class="finish-flash-layer" id="finishFlashLayer" aria-hidden="true"></div>
+    <div class="climax-jet-layer" id="climaxJetLayer" aria-hidden="true">
+      <div class="climax-jet-core"></div>
+      <div class="climax-jet-mist"></div>
+      <div class="climax-jet-splash climax-jet-splash-left"></div>
+      <div class="climax-jet-splash climax-jet-splash-right"></div>
+    </div>
+    <div class="finish-modal" id="finishModal" aria-hidden="true">
+      <div class="finish-modal-card panel" role="dialog" aria-modal="true" aria-labelledby="finishModalTitle">
+        <span id="finishModalEyebrow" class="mini-label"></span>
+        <span id="finishModalBadge" class="finish-modal-badge" hidden></span>
+        <h2 id="finishModalTitle"></h2>
+        <p id="finishModalText" class="finish-modal-text"></p>
+        <div class="finish-modal-actions">
+          <button id="finishModalRestart" class="pill-button" type="button"></button>
+          <a id="finishModalBackLink" class="back-link" href="./index.html"></a>
+        </div>
+      </div>
+    </div>
     <main class="text-game-page">
       <header class="page-header panel">
         <div>
-          <p class="eyebrow">MINI GAME</p>
-          <h1>今晚的打飞机</h1>
-          <p class="page-copy">躺在床上，右手握住鸡巴，通过不同手法把兴奋值推到顶点。注意保持持久度，避免提前疲软。</p>
+          <p id="pageEyebrow" class="eyebrow"></p>
+          <h1 id="pageHeading"></h1>
+          <p id="pageCopy" class="page-copy"></p>
         </div>
         <div class="header-actions">
-          <a class="back-link" href="./index.html">返回列表</a>
-          <a class="back-link" href="../index.html">返回主页</a>
+          <div class="header-links">
+            <a id="backToGamesLink" class="back-link" href="./index.html"></a>
+            <a id="backToHomeLink" class="back-link" href="../index.html"></a>
+          </div>
+          <div class="record-box" aria-label="个人快感纪录">
+            <span id="recordLabel" class="status-label"></span>
+            <strong id="recordValue">0</strong>
+          </div>
         </div>
       </header>
       <section class="text-game-grid">
         <article class="panel status-panel">
           <div class="section-heading">
             <div>
-              <p class="eyebrow">STATUS</p>
-              <h2>身体状态</h2>
+              <p id="statusEyebrow" class="eyebrow"></p>
+              <h2 id="statusHeading"></h2>
             </div>
-            <button id="textShooterRestart" class="pill-button" type="button">重开</button>
+            <button id="textShooterRestart" class="pill-button" type="button"></button>
           </div>
           <div class="status-grid">
             <div class="status-cell">
-              <span class="status-label">回合</span>
+              <span id="turnLabel" class="status-label"></span>
               <strong id="turnValue">1</strong>
             </div>
             <div class="status-cell">
-              <span class="status-label">兴奋值</span>
+              <span id="arousalLabel" class="status-label"></span>
               <strong id="hpValue">0</strong>
             </div>
             <div class="status-cell">
-              <span class="status-label">持久度</span>
+              <span id="enduranceLabel" class="status-label"></span>
               <strong id="shieldValue">100</strong>
             </div>
             <div class="status-cell">
-              <span class="status-label">手法</span>
+              <span id="techniqueLabel" class="status-label"></span>
               <strong id="ammoValue">2</strong>
             </div>
             <div class="status-cell">
-              <span class="status-label">阶段</span>
+              <span id="waveLabel" class="status-label"></span>
               <strong id="waveValue">1</strong>
             </div>
             <div class="status-cell">
-              <span class="status-label">快感</span>
+              <span id="scoreLabel" class="status-label"></span>
               <strong id="scoreValue">0</strong>
             </div>
           </div>
           <div class="objective-card">
-            <span class="mini-label">OBJECTIVE</span>
-            <strong id="objectiveTitle">把兴奋值冲到 100</strong>
-            <p id="objectiveMeta">同时尽量保持持久度，避免提前疲软。</p>
+            <span id="objectiveEyebrow" class="mini-label"></span>
+            <strong id="objectiveTitle"></strong>
+            <p id="objectiveMeta"></p>
           </div>
         </article>
         <article class="panel battle-panel">
           <div class="section-heading">
             <div>
-              <p class="eyebrow">现场</p>
-              <h2>当前状况</h2>
+              <p id="battleEyebrow" class="eyebrow"></p>
+              <h2 id="battleHeading"></h2>
             </div>
           </div>
-          <div id="narrativeBox" class="narrative-box">
-            你躺在床上，鸡巴已经半硬，右手慢慢握了上去。今晚的打飞机时间开始。
-          </div>
+          <div id="narrativeBox" class="narrative-box"></div>
           <div class="action-grid">
-            <button class="action-button" type="button" data-action="shoot">猛力撸动</button>
-            <button class="action-button" type="button" data-action="evade">边缘控制</button>
-            <button class="action-button" type="button" data-action="focus">精细龟头</button>
-            <button class="action-button" type="button" data-action="charge">加润滑幻想</button>
+            <button class="action-button" type="button"></button>
+            <button class="action-button" type="button"></button>
+            <button class="action-button" type="button"></button>
+            <button class="action-button" type="button"></button>
           </div>
         </article>
         <article class="panel log-panel">
           <div class="section-heading">
             <div>
-              <p class="eyebrow">LOG</p>
-              <h2>行动记录</h2>
+              <p id="logEyebrow" class="eyebrow"></p>
+              <h2 id="logHeading"></h2>
             </div>
           </div>
           <div id="textShooterLog" class="log-list"></div>

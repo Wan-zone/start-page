@@ -10,6 +10,9 @@
   --shadow: 0 24px 60px rgba(3, 6, 12, 0.34);
   --radius-xl: 28px;
   --radius-lg: 22px;
+  --liquid-fill: linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.04)), rgba(255, 255, 255, 0.05);
+  --liquid-border: rgba(255, 255, 255, 0.08);
+  --liquid-shadow: 0 22px 52px rgba(3, 6, 12, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.12), inset 0 -18px 28px rgba(255, 255, 255, 0.02);
 }
 
 * {
@@ -65,11 +68,26 @@ body {
 }
 
 .panel {
-  background: var(--surface);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  position: relative;
+  background: var(--liquid-fill);
+  border: 1px solid var(--liquid-border);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow);
-  backdrop-filter: blur(18px);
+  box-shadow: var(--liquid-shadow);
+  backdrop-filter: blur(22px) saturate(148%);
+  -webkit-backdrop-filter: blur(22px) saturate(148%);
+  overflow: hidden;
+}
+
+.panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at 24% 18%, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0.06) 26%, transparent 56%),
+    radial-gradient(circle at 78% 74%, rgba(255, 255, 255, 0.08), transparent 34%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.02));
+  pointer-events: none;
 }
 
 .page-header {
@@ -119,13 +137,16 @@ body {
   min-height: 44px;
   padding: 0 16px;
   border-radius: 999px;
-  border: 1px solid var(--line);
+  border: 1px solid var(--liquid-border);
   color: var(--text);
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--liquid-fill);
   text-decoration: none;
   font: inherit;
   font-weight: 800;
   cursor: pointer;
+  box-shadow: 0 14px 30px rgba(3, 6, 12, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(20px) saturate(148%);
+  -webkit-backdrop-filter: blur(20px) saturate(148%);
   transition:
     transform 160ms ease,
     background 160ms ease,
@@ -186,8 +207,11 @@ body {
 }
 
 .mobile-button-fire {
-  background: linear-gradient(135deg, var(--accent-deep), var(--accent));
-  color: #141820;
+  background:
+    radial-gradient(circle at 24% 18%, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.06) 24%, transparent 54%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.04)),
+    rgba(255, 255, 255, 0.08);
+  color: var(--text);
 }
 
 @media (max-width: 920px) {

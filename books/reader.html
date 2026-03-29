@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="书库阅读页 for Wan Start Page." />
+    <title>阅读页 | Wan Start Page</title>
+    <link rel="icon" type="image/svg+xml" href="../assets/icons/favicon.svg" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="books-page books-reader-page">
+      <section class="reader-stage glass-panel">
+        <div class="reader-shell reader-shell-interactive" id="readerShell" tabindex="0" aria-label="点击或触摸左右区域翻页，也可使用方向键翻页">
+          <div id="readerViewport" class="reader-viewport"></div>
+          <button id="readerPrevHotspot" class="reader-hotspot reader-hotspot-left" type="button" aria-label="上一页"></button>
+          <button id="readerNextHotspot" class="reader-hotspot reader-hotspot-right" type="button" aria-label="下一页"></button>
+        </div>
+        <div class="section-heading reader-info-heading">
+          <div>
+            <p class="eyebrow" id="readerInfoEyebrow">BOOK INFO</p>
+            <h2 id="readerBookTitle">选择书籍</h2>
+          </div>
+          <div class="books-actions">
+            <a class="books-link" id="readerBackLibraryLink" href="./index.html">返回书库</a>
+            <a class="books-link" id="readerBackHomeLink" href="../index.html">返回主页</a>
+          </div>
+        </div>
+        <p id="readerBookSummary" class="books-summary">当前阅读页先只显示书籍信息和占位说明。</p>
+        <div id="readerBookMeta" class="books-meta"></div>
+        <div id="readerBookBody" class="books-content">
+          <p>正在准备电子书内容。</p>
+        </div>
+        <div class="reader-bookmark-actions">
+          <button id="readerAddBookmarkButton" class="books-link" type="button">添加书签</button>
+          <button id="readerRemoveBookmarkButton" class="books-link" type="button">删除当前书签</button>
+          <button id="readerUndoButton" class="books-link" type="button">返回上一步</button>
+        </div>
+        <p id="readerStatus" class="reader-status">正在载入书籍…</p>
+        <p id="readerBookmarkHint" class="reader-bookmark-hint">使用下面的按钮保存或删除书签，点书签可直接跳转，误触后可用“返回上一步”回到刚才的位置。</p>
+        <section class="reader-bookmarks">
+          <div class="section-heading reader-bookmarks-heading">
+            <div>
+              <p class="eyebrow" id="readerBookmarksEyebrow">BOOKMARKS</p>
+              <h2 id="readerBookmarksTitle">已保存书签</h2>
+            </div>
+          </div>
+          <div id="readerBookmarksList" class="reader-bookmarks-list"></div>
+        </section>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/epubjs/dist/epub.min.js"></script>
+    <script src="./script.js"></script>
+  </body>
+</html>

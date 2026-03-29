@@ -1,0 +1,88 @@
+{
+  // 页面固定文案。
+  "ui": {
+    // 顶部区域文案。
+    "header": {
+      "eyebrow": "BOOKS",
+      "title": "书库",
+      "copy": "先展示当前书目，再进入单本阅读页。后面你可以继续补正文、章节和阅读器逻辑。"
+    },
+
+    // 列表区文案。
+    "library": {
+      "eyebrow": "LIBRARY",
+      "title": "全部书目"
+    },
+
+    // 右侧预览区文案。
+    "preview": {
+      "eyebrow": "PREVIEW",
+      "title": "选择一本书",
+      "summary": "点击左侧书目，先进入该书的阅读页。"
+    },
+
+    // 通用按钮文案。
+    "actions": {
+      "backHome": "返回主页",
+      "openReader": "开始阅读",
+      "backLibrary": "返回书库",
+      "prevPage": "上一页",
+      "nextPage": "下一页",
+      "addBookmark": "添加书签",
+      "removeBookmark": "删除当前书签",
+      "undoStep": "返回上一步"
+    },
+
+    // 阅读页文案。
+    "reader": {
+      "eyebrow": "READER",
+      "infoEyebrow": "BOOK INFO",
+      "copy": "这里直接打开 epub 在线阅读，后面你再继续细化阅读页布局。",
+      "loading": "正在载入书籍…",
+      "ready": "已进入在线阅读。",
+      "missingBook": "没有找到对应书籍。",
+      "missingFile": "当前书籍缺少 epub 文件名配置。",
+      "libraryEmpty": "当前书库为空，请先在 books.jsonc 里补书目。",
+      "engineMissing": "阅读引擎没有加载成功，当前无法在线打开 epub。",
+      "bookmarkHint": "使用下面的按钮保存或删除书签，点书签可直接跳转，误触后可用“返回上一步”回到刚才的位置。",
+      "bookmarkAdded": "已保存当前书签。",
+      "bookmarkRemoved": "已删除当前书签。",
+      "bookmarkExists": "当前位置已经在书签里了。",
+      "bookmarkMissing": "当前位置还没有书签。",
+      "undoReady": "已返回上一步位置。",
+      "undoMissing": "当前还没有可返回的位置。",
+      "bookmarksEyebrow": "BOOKMARKS",
+      "bookmarksTitle": "已保存书签",
+      "bookmarksEmpty": "当前还没有保存的书签。"
+    }
+  },
+
+  // 书库配置区。后面可继续补封面、作者、标签等字段。
+  "config": {
+    "defaultBookId": "caofangzi"
+  },
+
+  // 当前书目列表。后续新增书时，按同样结构继续往下加。
+  "books": [
+    {
+      "id": "caofangzi",
+      "title": "草房子",
+      "author": "曹文轩",
+      "filename": "草房子 (曹文轩) (z-library.sk, 1lib.sk, z-lib.sk).epub",
+      "summary": "一部以成长、乡村与少年记忆为主线的长篇小说。",
+      "status": "已入库",
+      "tags": ["成长", "乡村", "长篇"],
+      "entryNote": "当前先作为书库入口，后面再补章节和正文内容。"
+    },
+    {
+      "id": "shanyang",
+      "title": "山羊不吃天堂草",
+      "author": "曹文轩",
+      "filename": "山羊不吃天堂草 (曹文轩纯美小说系列(完整版)) (曹文轩) (z-library.sk, 1lib.sk, z-lib.sk).epub",
+      "summary": "一部更偏现实与漂泊感的成长小说，适合后续做独立阅读页整理。",
+      "status": "已入库",
+      "tags": ["成长", "现实", "长篇"],
+      "entryNote": "当前只先搭书目入口，后面你可以按章节或片段继续整理。"
+    }
+  ]
+}
