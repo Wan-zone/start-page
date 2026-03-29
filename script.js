@@ -4,6 +4,8 @@ const SEARCH_ENGINES = {
   baidu: "https://www.baidu.com/s?wd=",
 };
 
+const THEME_STORAGE_KEY = "wan-start-page-theme";
+
 const QUICK_LINKS = [
   {
     title: "GitHub",
@@ -69,6 +71,11 @@ const GALLERY_IMAGES = [
 ];
 
 const body = document.body;
+const themeSwitch = document.querySelector(".theme-switch");
+const themeHighlight = themeSwitch.querySelector(".segment-highlight");
+const themeDarkButton = document.getElementById("themeDarkButton");
+const themeLightButton = document.getElementById("themeLightButton");
+const railDots = document.querySelectorAll(".rail-dot");
 const greetingTitle = document.getElementById("greetingTitle");
 const focusTitle = document.getElementById("focusTitle");
 const focusMeta = document.getElementById("focusMeta");
@@ -80,14 +87,21 @@ const quoteSource = document.getElementById("quoteSource");
 const searchForm = document.getElementById("searchForm");
 const searchInput = document.getElementById("searchInput");
 const quickLinksGrid = document.getElementById("quickLinksGrid");
+const engineSwitch = document.querySelector(".engine-switch");
+const engineHighlight = engineSwitch.querySelector(".segment-highlight");
 const enginePills = document.querySelectorAll(".engine-pill");
 const galleryFrame = document.getElementById("galleryFrame");
 const galleryImage = document.getElementById("galleryImage");
 const galleryCaption = document.getElementById("galleryCaption");
+const sectionTargets = Array.from(railDots)
+  .map((button) => document.getElementById(button.dataset.target))
+  .filter(Boolean);
 
 let activeEngine = "google";
 let quotePool = FALLBACK_QUOTES;
 let currentImageIndex = 0;
+let themeSegmentControl;
+let engineSegmentControl;
 
 const LINK_ICONS = {
   github: `
@@ -126,6 +140,41 @@ const LINK_ICONS = {
     </svg>
   `,
 };
+
+function setTheme(theme) {
+  const nextTheme = theme === "light" ? "light" : "dark";
+  body.dataset.theme = nextTheme;
+
+  themeDarkButton.classList.toggle("is-active", nextTheme === "dark");
+  themeLightButton.classList.toggle("is-active", nextTheme === "light");
+  themeDarkButton.setAttribute("aria-pressed", String(nextTheme === "dark"));
+  themeLightButton.setAttribute("aria-pressed", String(nextTheme === "light"));
+
+  try {
+    window.localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
+  } catch (error) {
+    // Ignore storage failures and keep the UI usable.
+  }
+
+  if (themeSegmentControl) {
+    const targetButton = nextTheme === "dark" ? themeDarkButton : themeLightButton;
+    themeSegmentControl.snapTo(targetButton);
+  }
+}
+
+function initializeTheme() {
+  try {
+    const savedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
+    if (savedTheme === "light" || savedTheme === "dark") {
+      setTheme(savedTheme);
+      return;
+    }
+  } catch (error) {
+    // Ignore storage failures and use the default dark theme.
+  }
+
+  setTheme("dark");
+}
 
 function updateClock() {
   const now = new Date();
@@ -224,6 +273,13 @@ function setActiveEngine(engine) {
   enginePills.forEach((button) => {
     button.classList.toggle("is-active", button.dataset.engine === engine);
   });
+
+  if (engineSegmentControl) {
+    const targetButton = Array.from(enginePills).find((button) => button.dataset.engine === engine);
+    if (targetButton) {
+      engineSegmentControl.snapTo(targetButton);
+    }
+  }
 }
 
 function handleSearch(event) {
@@ -238,16 +294,227 @@ function handleSearch(event) {
   window.open(url, "_blank", "noopener,noreferrer");
 }
 
+function createRipple(event) {
+  const host = event.currentTarget;
+  const nearestHost = event.target.closest(".ripple-host");
+
+  if (nearestHost && nearestHost !== host) {
+    return;
+  }
+
+  const rect = host.getBoundingClientRect();
+  const ripple = document.createElement("span");
+
+  ripple.className = "ripple-wave";
+  ripple.style.left = `${event.clientX - rect.left}px`;
+  ripple.style.top = `${event.clientY - rect.top}px`;
+
+  host.appendChild(ripple);
+  ripple.addEventListener("animationend", () => ripple.remove(), { once: true });
+}
+
+function initializeRipples() {
+  const rippleTargets = document.querySelectorAll(
+    ".glass-card, .theme-button, .engine-pill, .primary-button, .subtle-button, .game-entry, .interactive-panel, .rail-dot"
+  );
+
+  rippleTargets.forEach((element) => {
+    element.classList.add("ripple-host");
+    element.addEventListener("pointerdown", createRipple);
+  });
+}
+
+function shouldAllowTextSelection(target) {
+  return Boolean(target.closest("input, textarea, [contenteditable='true']"));
+}
+
+function preventPageTextSelection(event) {
+  if (!shouldAllowTextSelection(event.target)) {
+    event.preventDefault();
+  }
+}
+
+function setActiveRail(targetId) {
+  railDots.forEach((button) => {
+    button.classList.toggle("is-active", button.dataset.target === targetId);
+  });
+}
+
+function updateActiveRailOnScroll() {
+  if (sectionTargets.length === 0) {
+    return;
+  }
+
+  const anchorLine = window.innerHeight * 0.32;
+  let currentSection = sectionTargets[0];
+
+  sectionTargets.forEach((section) => {
+    const rect = section.getBoundingClientRect();
+    if (rect.top <= anchorLine) {
+      currentSection = section;
+    }
+  });
+
+  setActiveRail(currentSection.id);
+}
+
+function scrollToSection(sectionId) {
+  const target = document.getElementById(sectionId);
+  if (!target) {
+    return;
+  }
+
+  target.scrollIntoView({
+    behavior: "smooth",
+    block: "start",
+  });
+}
+
+function positionSegmentHighlight(container, highlight, target, animate = true) {
+  if (!container || !highlight || !target) {
+    return;
+  }
+
+  const containerRect = container.getBoundingClientRect();
+  const targetRect = target.getBoundingClientRect();
+  const insetLeft = parseFloat(window.getComputedStyle(highlight).left) || 0;
+  const offset = targetRect.left - containerRect.left - insetLeft;
+
+  highlight.style.transition = animate ? "" : "none";
+  highlight.style.width = `${targetRect.width}px`;
+  highlight.style.transform = `translateX(${offset}px)`;
+
+  if (!animate) {
+    requestAnimationFrame(() => {
+      highlight.style.transition = "";
+    });
+  }
+}
+
+function createSegmentControl(container, highlight, buttons, onSelect) {
+  if (!container || !highlight || buttons.length === 0) {
+    return null;
+  }
+
+  let isDragging = false;
+  let activePointerId = null;
+  let currentTarget = buttons.find((button) => button.classList.contains("is-active")) ?? buttons[0];
+
+  function getNearestButton(clientX) {
+    let nearest = buttons[0];
+    let bestDistance = Number.POSITIVE_INFINITY;
+
+    buttons.forEach((button) => {
+      const rect = button.getBoundingClientRect();
+      const center = rect.left + rect.width / 2;
+      const distance = Math.abs(clientX - center);
+      if (distance < bestDistance) {
+        bestDistance = distance;
+        nearest = button;
+      }
+    });
+
+    return nearest;
+  }
+
+  function syncCurrentButton(animate = true) {
+    positionSegmentHighlight(container, highlight, currentTarget, animate);
+  }
+
+  function selectButton(button) {
+    currentTarget = button;
+    onSelect(button);
+  }
+
+  buttons.forEach((button) => {
+    button.addEventListener("click", () => {
+      selectButton(button);
+    });
+  });
+
+  container.addEventListener("pointerdown", (event) => {
+    if (!event.isPrimary) {
+      return;
+    }
+
+    const targetButton = event.target.closest("button");
+    if (!targetButton || !buttons.includes(targetButton)) {
+      return;
+    }
+
+    isDragging = true;
+    activePointerId = event.pointerId;
+    currentTarget = targetButton;
+    container.setPointerCapture(event.pointerId);
+    positionSegmentHighlight(container, highlight, targetButton, false);
+  });
+
+  container.addEventListener("pointermove", (event) => {
+    if (!isDragging || event.pointerId !== activePointerId) {
+      return;
+    }
+
+    const nearest = getNearestButton(event.clientX);
+    if (nearest !== currentTarget) {
+      currentTarget = nearest;
+      positionSegmentHighlight(container, highlight, nearest, false);
+    }
+  });
+
+  function finishDrag(event) {
+    if (!isDragging || event.pointerId !== activePointerId) {
+      return;
+    }
+
+    isDragging = false;
+    activePointerId = null;
+    if (container.hasPointerCapture(event.pointerId)) {
+      container.releasePointerCapture(event.pointerId);
+    }
+    selectButton(currentTarget);
+  }
+
+  container.addEventListener("pointerup", finishDrag);
+  container.addEventListener("pointercancel", finishDrag);
+
+  return {
+    snapTo(button, animate = true) {
+      currentTarget = button;
+      positionSegmentHighlight(container, highlight, button, animate);
+    },
+    refresh() {
+      syncCurrentButton(false);
+    },
+  };
+}
+
+initializeTheme();
 renderQuickLinks();
 renderGalleryImage();
 updateClock();
 loadQuotes();
+initializeRipples();
+
+themeSegmentControl = createSegmentControl(
+  themeSwitch,
+  themeHighlight,
+  [themeDarkButton, themeLightButton],
+  (button) => setTheme(button === themeLightButton ? "light" : "dark")
+);
+
+engineSegmentControl = createSegmentControl(
+  engineSwitch,
+  engineHighlight,
+  Array.from(enginePills),
+  (button) => setActiveEngine(button.dataset.engine)
+);
+
+themeSegmentControl?.refresh();
+engineSegmentControl?.refresh();
 setInterval(updateClock, 1000);
-
-enginePills.forEach((button) => {
-  button.addEventListener("click", () => setActiveEngine(button.dataset.engine));
+railDots.forEach((button) => {
+  button.addEventListener("click", () => scrollToSection(button.dataset.target));
 });
-
 searchForm.addEventListener("submit", handleSearch);
 quoteCard.addEventListener("click", renderQuote);
 quoteCard.addEventListener("keydown", (event) => handleInteractiveKeydown(event, renderQuote));
@@ -256,4 +523,13 @@ galleryFrame.addEventListener("keydown", (event) => handleInteractiveKeydown(eve
 
 window.addEventListener("load", () => {
   body.classList.add("is-ready");
+  updateActiveRailOnScroll();
 });
+
+window.addEventListener("scroll", updateActiveRailOnScroll, { passive: true });
+window.addEventListener("resize", () => {
+  themeSegmentControl?.refresh();
+  engineSegmentControl?.refresh();
+});
+document.addEventListener("selectstart", preventPageTextSelection);
+document.addEventListener("dblclick", preventPageTextSelection);

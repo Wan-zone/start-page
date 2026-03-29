@@ -9,7 +9,6 @@ const PLAYER_INVINCIBLE_MS = 900;
 
 const canvas = document.getElementById("shooterGame");
 const ctx = canvas.getContext("2d");
-const startButton = document.getElementById("gameStartButton");
 const mobileButtons = document.querySelectorAll(".mobile-button");
 
 const state = {
@@ -418,10 +417,10 @@ function renderOverlay() {
   ctx.textAlign = "center";
   ctx.fillStyle = "#e6e4de";
   ctx.font = "700 28px Manrope, sans-serif";
-  ctx.fillText("开始 / 重新开始", canvas.width / 2, canvas.height / 2 - 12);
+  ctx.fillText("点击画面开始", canvas.width / 2, canvas.height / 2 - 12);
   ctx.font = "400 16px Manrope, sans-serif";
   ctx.fillStyle = "#9aa3b5";
-  ctx.fillText("键盘或下方触控按钮都能玩", canvas.width / 2, canvas.height / 2 + 20);
+  ctx.fillText("结束后再次点击画面即可重新开始", canvas.width / 2, canvas.height / 2 + 20);
 }
 
 function renderFrame(timestamp) {
@@ -510,9 +509,19 @@ function bindMobileButton(button) {
   button.addEventListener("pointercancel", release);
 }
 
+function handleCanvasActivate(event) {
+  if (state.running) {
+    return;
+  }
+
+  event.preventDefault();
+  resetGame();
+}
+
 syncHud("待开始");
 renderFrame(performance.now());
-startButton.addEventListener("click", resetGame);
+canvas.addEventListener("click", handleCanvasActivate);
+canvas.addEventListener("pointerdown", handleCanvasActivate);
 window.addEventListener("keydown", handleKeyDown);
 window.addEventListener("keyup", handleKeyUp);
 mobileButtons.forEach(bindMobileButton);

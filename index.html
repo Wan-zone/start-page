@@ -21,8 +21,21 @@
       <div class="ambient ambient-top"></div>
       <div class="ambient ambient-bottom"></div>
 
+      <div class="theme-switch" role="group" aria-label="主题切换">
+        <span class="segment-highlight" aria-hidden="true"></span>
+        <button id="themeDarkButton" class="theme-button is-active" type="button" aria-pressed="true">Dark</button>
+        <button id="themeLightButton" class="theme-button" type="button" aria-pressed="false">Light</button>
+      </div>
+
+      <nav class="section-rail" aria-label="页面导航">
+        <button class="rail-dot is-active" type="button" data-target="searchSection" data-label="搜索"></button>
+        <button class="rail-dot" type="button" data-target="heroSection" data-label="首页"></button>
+        <button class="rail-dot" type="button" data-target="shortcutsSection" data-label="常用入口"></button>
+        <button class="rail-dot" type="button" data-target="dashboardSection" data-label="下方卡片"></button>
+      </nav>
+
       <main class="layout">
-        <section class="hero glass-card">
+        <section class="hero glass-card" id="heroSection">
           <div class="hero-copy">
             <p class="eyebrow">WAN / START PAGE</p>
             <h1 id="greetingTitle">早上好，准备进入今天的重点。</h1>
@@ -52,7 +65,7 @@
           </aside>
         </section>
 
-        <section class="search-panel glass-card">
+        <section class="search-panel glass-card" id="searchSection">
           <div class="section-heading">
             <div>
               <p class="eyebrow">SEARCH</p>
@@ -68,13 +81,14 @@
           </form>
 
           <div class="engine-switch" role="tablist" aria-label="Search engines">
+            <span class="segment-highlight" aria-hidden="true"></span>
             <button class="engine-pill is-active" type="button" data-engine="google">Google</button>
             <button class="engine-pill" type="button" data-engine="bing">Bing</button>
             <button class="engine-pill" type="button" data-engine="baidu">Baidu</button>
           </div>
         </section>
 
-        <section class="links-panel">
+        <section class="links-panel" id="shortcutsSection">
           <div class="section-heading">
             <div>
               <p class="eyebrow">SHORTCUTS</p>
@@ -86,7 +100,7 @@
           <div id="quickLinksGrid" class="links-grid"></div>
         </section>
 
-        <section class="dashboard-grid">
+        <section class="dashboard-grid" id="dashboardSection">
           <article class="glass-card gallery-card">
             <div class="section-heading compact">
               <div>

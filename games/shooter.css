@@ -140,6 +140,7 @@ body {
     radial-gradient(circle at top, rgba(95, 116, 161, 0.18), transparent 35%),
     linear-gradient(180deg, #0c1119 0%, #111827 55%, #0a0e15 100%);
   touch-action: none;
+  cursor: pointer;
 }
 
 .mobile-controls {
