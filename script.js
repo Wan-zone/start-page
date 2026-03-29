@@ -382,7 +382,9 @@ function positionSegmentHighlight(container, highlight, target, animate = true) 
 
   highlight.style.transition = animate ? "" : "none";
   highlight.style.width = `${targetRect.width}px`;
-  highlight.style.transform = `translateX(${offset}px)`;
+  highlight.style.transformOrigin = "center center";
+  highlight.style.left = `${insetLeft + offset}px`;
+  highlight.style.transform = "scaleX(1) scaleY(1)";
 
   if (!animate) {
     requestAnimationFrame(() => {
@@ -399,6 +401,7 @@ function createSegmentControl(container, highlight, buttons, onSelect) {
   let isDragging = false;
   let activePointerId = null;
   let currentTarget = buttons.find((button) => button.classList.contains("is-active")) ?? buttons[0];
+  let dragOffsetX = 0;
 
   function getNearestButton(clientX) {
     let nearest = buttons[0];
@@ -415,6 +418,18 @@ function createSegmentControl(container, highlight, buttons, onSelect) {
     });
 
     return nearest;
+  }
+
+  function getButtonBounds(button) {
+    const containerRect = container.getBoundingClientRect();
+    const buttonRect = button.getBoundingClientRect();
+    const insetLeft = parseFloat(window.getComputedStyle(highlight).left) || 0;
+    return {
+      left: buttonRect.left - containerRect.left,
+      minLeft: buttonRect.left - containerRect.left - insetLeft,
+      width: buttonRect.width,
+      insetLeft,
+    };
   }
 
   function syncCurrentButton(animate = true) {
@@ -445,6 +460,8 @@ function createSegmentControl(container, highlight, buttons, onSelect) {
     isDragging = true;
     activePointerId = event.pointerId;
     currentTarget = targetButton;
+    const bounds = getButtonBounds(targetButton);
+    dragOffsetX = event.clientX - (container.getBoundingClientRect().left + bounds.left + bounds.width / 2);
     container.setPointerCapture(event.pointerId);
     positionSegmentHighlight(container, highlight, targetButton, false);
   });
@@ -454,11 +471,22 @@ function createSegmentControl(container, highlight, buttons, onSelect) {
       return;
     }
 
-    const nearest = getNearestButton(event.clientX);
-    if (nearest !== currentTarget) {
-      currentTarget = nearest;
-      positionSegmentHighlight(container, highlight, nearest, false);
-    }
+    const containerRect = container.getBoundingClientRect();
+    const firstBounds = getButtonBounds(buttons[0]);
+    const lastBounds = getButtonBounds(buttons[buttons.length - 1]);
+    const width = currentTarget.getBoundingClientRect().width;
+    const minLeft = firstBounds.left;
+    const maxLeft = lastBounds.left;
+    const rawLeft = event.clientX - containerRect.left - dragOffsetX - width / 2;
+    const clampedLeft = Math.max(minLeft, Math.min(maxLeft, rawLeft));
+    const overshoot = rawLeft < minLeft ? minLeft - rawLeft : rawLeft > maxLeft ? rawLeft - maxLeft : 0;
+    const stretch = overshoot > 0 ? Math.max(0.78, 1 - overshoot / 95) : 1;
+    const squash = overshoot > 0 ? Math.min(1.25, 1 + overshoot / 80) : 1;
+
+    highlight.style.transition = "none";
+    highlight.style.left = `${clampedLeft}px`;
+    highlight.style.transformOrigin = rawLeft < minLeft ? "left center" : rawLeft > maxLeft ? "right center" : "center center";
+    highlight.style.transform = `scaleX(${stretch}) scaleY(${squash})`;
   });
 
   function finishDrag(event) {
@@ -471,6 +499,8 @@ function createSegmentControl(container, highlight, buttons, onSelect) {
     if (container.hasPointerCapture(event.pointerId)) {
       container.releasePointerCapture(event.pointerId);
     }
+    const nearest = getNearestButton(event.clientX);
+    currentTarget = nearest;
     selectButton(currentTarget);
   }
 
