@@ -141,6 +141,7 @@ const themeSwitch = document.querySelector(".theme-switch");
 const themeHighlight = themeSwitch.querySelector(".segment-highlight");
 const themeDarkButton = document.getElementById("themeDarkButton");
 const themeLightButton = document.getElementById("themeLightButton");
+const railIndicator = document.getElementById("railIndicator");
 const railDots = document.querySelectorAll(".rail-dot");
 const greetingTitle = document.getElementById("greetingTitle");
 const timeCard = document.getElementById("timeCard");
@@ -159,6 +160,7 @@ const engineSwitch = document.querySelector(".engine-switch");
 const engineHighlight = engineSwitch.querySelector(".segment-highlight");
 const enginePills = document.querySelectorAll(".engine-pill");
 const galleryFrame = document.getElementById("galleryFrame");
+const galleryPrevButton = document.getElementById("galleryPrevButton");
 const galleryZoomButton = document.getElementById("galleryZoomButton");
 const galleryImage = document.getElementById("galleryImage");
 const galleryCaption = document.getElementById("galleryCaption");
@@ -166,6 +168,9 @@ const galleryLightbox = document.getElementById("galleryLightbox");
 const galleryLightboxImage = document.getElementById("galleryLightboxImage");
 const galleryLightboxCaption = document.getElementById("galleryLightboxCaption");
 const galleryLightboxClose = document.getElementById("galleryLightboxClose");
+const mascotWidget = document.getElementById("mascotWidget");
+const mascotButton = document.getElementById("mascotButton");
+const mascotBubble = document.getElementById("mascotBubble");
 const sectionTargets = Array.from(railDots)
   .map((button) => document.getElementById(button.dataset.target))
   .filter(Boolean);
@@ -178,6 +183,18 @@ let detailedClockEnabled = false;
 let currentFocusPeriod = "";
 let themeSegmentControl;
 let engineSegmentControl;
+let pageDragState = null;
+let mascotReactionTimer = 0;
+let mascotTalkingTimer = 0;
+
+const MASCOT_LINES = [
+  "先搜索，再动手。",
+  "今天也别切太碎。",
+  "推进一点就是前进。",
+  "先把主线做完。",
+  "我在右下角陪你。",
+  "点我会有反应。",
+];
 
 const LINK_ICONS = {
   github: `
@@ -277,6 +294,10 @@ function toDisplayImageSrc(src) {
   return encodeURI(src);
 }
 
+function randomFrom(items) {
+  return items[Math.floor(Math.random() * items.length)];
+}
+
 function initializeTheme() {
   try {
     const savedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
@@ -357,7 +378,7 @@ function renderQuote() {
 
 async function loadQuotes() {
   try {
-    const response = await fetch("./quotes.json", { cache: "no-store" });
+    const response = await fetch("./data/quotes.json", { cache: "no-store" });
     if (!response.ok) {
       throw new Error("Failed to load quotes");
     }
@@ -392,6 +413,15 @@ function showNextImage() {
   renderGalleryImage();
 }
 
+function showPreviousImage() {
+  if (galleryImages.length === 0) {
+    return;
+  }
+
+  currentImageIndex = (currentImageIndex - 1 + galleryImages.length) % galleryImages.length;
+  renderGalleryImage();
+}
+
 function openGalleryLightbox() {
   if (galleryImages.length === 0) {
     return;
@@ -420,9 +450,45 @@ function handleGalleryImageError() {
   renderGalleryImage();
 }
 
+function reactMascot() {
+  if (!mascotWidget || !mascotBubble) {
+    return;
+  }
+
+  mascotBubble.textContent = randomFrom(MASCOT_LINES);
+  mascotWidget.classList.remove("is-reacting");
+  void mascotWidget.offsetWidth;
+  mascotWidget.classList.add("is-talking", "is-reacting");
+  window.clearTimeout(mascotReactionTimer);
+  window.clearTimeout(mascotTalkingTimer);
+  mascotReactionTimer = window.setTimeout(() => {
+    mascotWidget.classList.remove("is-reacting");
+  }, 520);
+  mascotTalkingTimer = window.setTimeout(() => {
+    mascotWidget.classList.remove("is-talking");
+  }, 2200);
+}
+
+function moveMascotEyes(event) {
+  if (!mascotButton) {
+    return;
+  }
+
+  const rect = mascotButton.getBoundingClientRect();
+  const centerX = rect.left + rect.width / 2;
+  const centerY = rect.top + rect.height / 2;
+  const offsetX = Math.max(-5, Math.min(5, (event.clientX - centerX) / 36));
+  const offsetY = Math.max(-3, Math.min(3, (event.clientY - centerY) / 42));
+  const rotate = Math.max(-3.5, Math.min(3.5, (event.clientX - centerX) / 60));
+
+  mascotButton.style.setProperty("--mascot-shift-x", `${offsetX}px`);
+  mascotButton.style.setProperty("--mascot-shift-y", `${offsetY}px`);
+  mascotButton.style.setProperty("--mascot-rotate", `${rotate}deg`);
+}
+
 async function loadGalleryManifest() {
   try {
-    const response = await fetch("./assets/gallery/gallery.json", { cache: "no-store" });
+    const response = await fetch("./data/gallery.json", { cache: "no-store" });
     if (!response.ok) {
       throw new Error("Failed to load gallery manifest");
     }
@@ -528,10 +594,98 @@ function preventPageTextSelection(event) {
   }
 }
 
+function shouldSkipPageDrag(target) {
+  return Boolean(
+    target.closest(
+      "input, textarea, [contenteditable='true'], button, a, .theme-switch, .engine-switch, .section-rail, .interactive-panel, .link-card, .game-entry, canvas"
+    )
+  );
+}
+
+function beginPageDrag(event) {
+  if (!event.isPrimary || shouldSkipPageDrag(event.target)) {
+    return;
+  }
+
+  pageDragState = {
+    pointerId: event.pointerId,
+    startX: event.clientX,
+    startY: event.clientY,
+    scrollLeft: window.scrollX,
+    scrollTop: window.scrollY,
+    moved: false,
+  };
+
+  body.classList.add("is-dragging-page");
+}
+
+function movePageDrag(event) {
+  if (!pageDragState || event.pointerId !== pageDragState.pointerId) {
+    return;
+  }
+
+  const deltaX = event.clientX - pageDragState.startX;
+  const deltaY = event.clientY - pageDragState.startY;
+
+  if (!pageDragState.moved && (Math.abs(deltaX) > 3 || Math.abs(deltaY) > 3)) {
+    pageDragState.moved = true;
+  }
+
+  if (!pageDragState.moved) {
+    return;
+  }
+
+  event.preventDefault();
+  window.scrollTo(pageDragState.scrollLeft - deltaX, pageDragState.scrollTop - deltaY);
+}
+
+function endPageDrag(event) {
+  if (!pageDragState || event.pointerId !== pageDragState.pointerId) {
+    return;
+  }
+
+  pageDragState = null;
+  body.classList.remove("is-dragging-page");
+}
+
+function moveRailIndicator(targetButton, animate = true) {
+  if (!railIndicator || !targetButton) {
+    return;
+  }
+
+  railIndicator.style.transition = animate ? "" : "none";
+  railIndicator.classList.add("is-traveling");
+  railIndicator.style.left = `${targetButton.offsetLeft}px`;
+  railIndicator.style.top = `${targetButton.offsetTop}px`;
+
+  if (!animate) {
+    railIndicator.classList.remove("is-traveling");
+    requestAnimationFrame(() => {
+      railIndicator.style.transition = "";
+    });
+    return;
+  }
+
+  window.clearTimeout(moveRailIndicator.resetTimer);
+  moveRailIndicator.resetTimer = window.setTimeout(() => {
+    railIndicator.classList.remove("is-traveling");
+  }, 240);
+}
+
 function setActiveRail(targetId) {
+  let activeButton = null;
+
   railDots.forEach((button) => {
-    button.classList.toggle("is-active", button.dataset.target === targetId);
+    const shouldActivate = button.dataset.target === targetId;
+    button.classList.toggle("is-active", shouldActivate);
+    if (shouldActivate) {
+      activeButton = button;
+    }
   });
+
+  if (activeButton) {
+    moveRailIndicator(activeButton);
+  }
 }
 
 function updateActiveRailOnScroll() {
@@ -759,6 +913,10 @@ focusCard.addEventListener("click", () => refreshFocus());
 focusCard.addEventListener("keydown", (event) => handleInteractiveKeydown(event, () => refreshFocus()));
 galleryFrame.addEventListener("click", showNextImage);
 galleryFrame.addEventListener("keydown", (event) => handleInteractiveKeydown(event, showNextImage));
+galleryPrevButton.addEventListener("click", (event) => {
+  event.stopPropagation();
+  showPreviousImage();
+});
 galleryImage.addEventListener("error", handleGalleryImageError);
 galleryLightboxImage.addEventListener("error", closeGalleryLightbox);
 galleryZoomButton.addEventListener("click", (event) => {
@@ -771,17 +929,31 @@ galleryLightbox.addEventListener("click", (event) => {
     closeGalleryLightbox();
   }
 });
+mascotButton?.addEventListener("click", reactMascot);
 
 window.addEventListener("load", () => {
   body.classList.add("is-ready");
   updateActiveRailOnScroll();
+  const initialRail = document.querySelector(".rail-dot.is-active");
+  if (initialRail) {
+    moveRailIndicator(initialRail, false);
+  }
 });
 
 window.addEventListener("scroll", updateActiveRailOnScroll, { passive: true });
 window.addEventListener("resize", () => {
   themeSegmentControl?.refresh();
   engineSegmentControl?.refresh();
+  const activeRail = document.querySelector(".rail-dot.is-active");
+  if (activeRail) {
+    moveRailIndicator(activeRail, false);
+  }
 });
+document.addEventListener("pointerdown", beginPageDrag);
+document.addEventListener("pointermove", movePageDrag, { passive: false });
+document.addEventListener("pointerup", endPageDrag);
+document.addEventListener("pointercancel", endPageDrag);
+window.addEventListener("pointermove", moveMascotEyes, { passive: true });
 window.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && galleryLightbox.classList.contains("is-open")) {
     closeGalleryLightbox();

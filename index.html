@@ -14,6 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
+    <link rel="icon" type="image/svg+xml" href="./assets/icons/favicon.svg" />
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
@@ -28,6 +29,7 @@
       </div>
 
       <nav class="section-rail" aria-label="页面导航">
+        <span class="rail-indicator" id="railIndicator" aria-hidden="true"></span>
         <button class="rail-dot is-active" type="button" data-target="searchSection" data-label="搜索"></button>
         <button class="rail-dot" type="button" data-target="heroSection" data-label="首页"></button>
         <button class="rail-dot" type="button" data-target="shortcutsSection" data-label="常用入口"></button>
@@ -110,6 +112,9 @@
             </div>
 
             <div class="gallery-frame interactive-panel" id="galleryFrame" role="button" tabindex="0" aria-label="点击切换图片">
+              <button id="galleryPrevButton" class="gallery-nav-button gallery-prev-button" type="button" aria-label="查看上一张图片">
+                上一张
+              </button>
               <button id="galleryZoomButton" class="gallery-zoom-button" type="button" aria-label="放大查看当前图片">
                 放大
               </button>
@@ -149,6 +154,17 @@
           </article>
         </section>
       </main>
+    </div>
+
+    <div class="mascot-widget" id="mascotWidget" aria-live="polite">
+      <div class="mascot-bubble" id="mascotBubble">点我一下</div>
+      <button class="mascot-button" id="mascotButton" type="button" aria-label="右下角互动小人">
+        <img
+          class="mascot-image"
+          src="./assets/mascot/bochi.png"
+          alt="右下角互动小人"
+        />
+      </button>
     </div>
 
     <div id="galleryLightbox" class="gallery-lightbox" aria-hidden="true">

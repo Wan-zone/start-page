@@ -22,7 +22,7 @@ from PIL import Image, ImageOps
 
 PROJECT_ROOT = Path("/home/wan/my-little-projects/start-page")
 SOURCE_DIR = PROJECT_ROOT / "assets" / "gallery"
-MANIFEST_PATH = SOURCE_DIR / "gallery.json"
+MANIFEST_PATH = PROJECT_ROOT / "data" / "gallery.json"
 
 SUPPORTED_SUFFIXES = {".jpg", ".jpeg", ".png", ".webp"}
 MAX_LONG_EDGE = 1600
