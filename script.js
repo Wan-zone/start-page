@@ -6,6 +6,7 @@ const SEARCH_ENGINES = {
 
 const THEME_STORAGE_KEY = "wan-start-page-theme";
 const API_BASE_STORAGE_KEY = "wan-start-page-api-base";
+const DEFAULT_API_BASE = "https://start-page-api.onrender.com";
 
 const QUICK_LINKS = [
   {
@@ -194,9 +195,9 @@ function normalizeApiBase(value) {
 
 function getStoredApiBase() {
   try {
-    return window.localStorage.getItem(API_BASE_STORAGE_KEY) || "";
+    return window.localStorage.getItem(API_BASE_STORAGE_KEY) || DEFAULT_API_BASE;
   } catch (error) {
-    return "";
+    return DEFAULT_API_BASE;
   }
 }
 
@@ -212,7 +213,7 @@ async function testApiHealth() {
   const apiBase = normalizeApiBase(apiBaseInput?.value || "");
 
   if (!apiBase) {
-    apiStatusText.textContent = "请先填写 Quick Tunnel 或 API 域名。";
+    apiStatusText.textContent = "请先填写正式 API 域名。";
     return;
   }
 
