@@ -162,6 +162,40 @@
           </article>
 
           <div class="widgets-stack" id="widgetsSection">
+            <article class="glass-card widget-card auth-card">
+              <div class="section-heading compact">
+                <div>
+                  <p class="eyebrow">ACCOUNT</p>
+                  <h2>账户</h2>
+                </div>
+              </div>
+
+              <div class="auth-status-block">
+                <span class="mini-label">SESSION</span>
+                <strong id="authStatusTitle" class="auth-status-title">未登录</strong>
+                <span id="authStatusMeta" class="quote-meta">可以本地注册和登录，服务器也能直接测试。</span>
+              </div>
+
+              <div class="auth-form-grid">
+                <label class="sr-only" for="authUsernameInput">用户名</label>
+                <input id="authUsernameInput" class="auth-input" type="text" placeholder="用户名（3-32位字母数字下划线）" autocomplete="username" />
+
+                <label class="sr-only" for="authDisplayNameInput">显示名</label>
+                <input id="authDisplayNameInput" class="auth-input" type="text" placeholder="显示名（可选）" autocomplete="nickname" />
+
+                <label class="sr-only" for="authPasswordInput">密码</label>
+                <input id="authPasswordInput" class="auth-input" type="password" placeholder="密码（至少 6 位）" autocomplete="current-password" />
+              </div>
+
+              <div class="auth-actions">
+                <button id="authRegisterButton" class="subtle-button" type="button">注册</button>
+                <button id="authLoginButton" class="primary-button" type="button">登录</button>
+                <button id="authLogoutButton" class="subtle-button" type="button">退出</button>
+              </div>
+
+              <p id="authResultText" class="api-status-text">等待操作。</p>
+            </article>
+
             <article class="glass-card widget-card">
               <div class="section-heading compact">
                 <div>
@@ -191,6 +225,24 @@
                 <span class="quote-meta">进入游戏列表，再选择具体游戏。</span>
               </a>
             </article>
+
+            <article class="glass-card widget-card developer-only-card debug-log-card" id="debugLogCard">
+              <div class="section-heading compact">
+                <div>
+                  <p class="eyebrow">DEBUG LOG</p>
+                  <h2>调试记录</h2>
+                </div>
+              </div>
+
+              <div class="debug-log-actions">
+                <button id="debugLogClearButton" class="subtle-button" type="button">清空记录</button>
+                <button id="debugLogCopyButton" class="subtle-button" type="button">复制记录</button>
+              </div>
+
+              <div id="debugLogList" class="debug-log-list">
+                <p class="debug-log-empty">开发者模式下的操作记录会显示在这里。</p>
+              </div>
+            </article>
           </div>
         </section>
       </main>
@@ -219,7 +271,10 @@
         <span class="mini-label">API STATUS</span>
         <strong id="apiResultTitle" class="api-result-title">连接结果</strong>
         <p id="apiResultBody" class="api-result-body">等待测试。</p>
-        <button id="apiResultClose" class="primary-button" type="button">关闭</button>
+        <div class="api-result-actions">
+          <button id="apiResultCopy" class="subtle-button" type="button">复制调试信息</button>
+          <button id="apiResultClose" class="primary-button" type="button">关闭</button>
+        </div>
       </div>
     </div>
 

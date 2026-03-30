@@ -7,6 +7,9 @@ const SEARCH_ENGINES = {
 const THEME_STORAGE_KEY = "wan-start-page-theme";
 const APP_MODE_STORAGE_KEY = "wan-start-page-mode";
 const API_BASE_STORAGE_KEY = "wan-start-page-api-base";
+const AUTH_TOKEN_STORAGE_KEY = "wan-start-page-auth-token";
+const AUTH_USER_STORAGE_KEY = "wan-start-page-auth-user";
+const DEBUG_LOG_STORAGE_KEY = "wan-start-page-debug-log";
 const DEFAULT_API_BASE = "";
 
 const QUICK_LINKS = [
@@ -168,8 +171,22 @@ const apiResultModal = document.getElementById("apiResultModal");
 const apiResultBackdrop = document.getElementById("apiResultBackdrop");
 const apiResultTitle = document.getElementById("apiResultTitle");
 const apiResultBody = document.getElementById("apiResultBody");
+const apiResultCopy = document.getElementById("apiResultCopy");
 const apiResultClose = document.getElementById("apiResultClose");
 const apiTestCard = document.getElementById("apiTestCard");
+const authStatusTitle = document.getElementById("authStatusTitle");
+const authStatusMeta = document.getElementById("authStatusMeta");
+const authUsernameInput = document.getElementById("authUsernameInput");
+const authDisplayNameInput = document.getElementById("authDisplayNameInput");
+const authPasswordInput = document.getElementById("authPasswordInput");
+const authRegisterButton = document.getElementById("authRegisterButton");
+const authLoginButton = document.getElementById("authLoginButton");
+const authLogoutButton = document.getElementById("authLogoutButton");
+const authResultText = document.getElementById("authResultText");
+const debugLogCard = document.getElementById("debugLogCard");
+const debugLogList = document.getElementById("debugLogList");
+const debugLogClearButton = document.getElementById("debugLogClearButton");
+const debugLogCopyButton = document.getElementById("debugLogCopyButton");
 const galleryFrame = document.getElementById("galleryFrame");
 const galleryPrevButton = document.getElementById("galleryPrevButton");
 const galleryZoomButton = document.getElementById("galleryZoomButton");
@@ -201,6 +218,9 @@ let searchInputFeedbackTimer = 0;
 let previousSearchValue = "";
 let pendingSearchFeedbackType = "typing";
 let mascotLines = [];
+let currentAuthToken = "";
+let currentAuthUser = null;
+let debugLogEntries = [];
 
 function normalizeApiBase(value) {
   return value.trim().replace(/\/+$/, "");
@@ -244,6 +264,198 @@ function saveApiBase(value) {
   }
 }
 
+function getStoredAuthToken() {
+  try {
+    return window.localStorage.getItem(AUTH_TOKEN_STORAGE_KEY) || "";
+  } catch (error) {
+    return "";
+  }
+}
+
+function saveAuthToken(value) {
+  try {
+    if (value) {
+      window.localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, value);
+    } else {
+      window.localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
+    }
+  } catch (error) {
+    // Ignore storage failures.
+  }
+}
+
+function getStoredAuthUser() {
+  try {
+    const rawValue = window.localStorage.getItem(AUTH_USER_STORAGE_KEY);
+    return rawValue ? JSON.parse(rawValue) : null;
+  } catch (error) {
+    return null;
+  }
+}
+
+function saveAuthUser(user) {
+  try {
+    if (user) {
+      window.localStorage.setItem(AUTH_USER_STORAGE_KEY, JSON.stringify(user));
+    } else {
+      window.localStorage.removeItem(AUTH_USER_STORAGE_KEY);
+    }
+  } catch (error) {
+    // Ignore storage failures.
+  }
+}
+
+function loadDebugLogs() {
+  try {
+    const rawValue = window.localStorage.getItem(DEBUG_LOG_STORAGE_KEY);
+    debugLogEntries = rawValue ? JSON.parse(rawValue) : [];
+  } catch (error) {
+    debugLogEntries = [];
+  }
+}
+
+function persistDebugLogs() {
+  try {
+    window.localStorage.setItem(DEBUG_LOG_STORAGE_KEY, JSON.stringify(debugLogEntries.slice(0, 60)));
+  } catch (error) {
+    // Ignore storage failures.
+  }
+}
+
+function renderDebugLogs() {
+  if (!debugLogList) {
+    return;
+  }
+
+  if (!Array.isArray(debugLogEntries) || debugLogEntries.length === 0) {
+    debugLogList.innerHTML = '<p class="debug-log-empty">开发者模式下的操作记录会显示在这里。</p>';
+    return;
+  }
+
+  debugLogList.innerHTML = debugLogEntries
+    .slice()
+    .reverse()
+    .map((entry) => {
+      const detailText =
+        typeof entry.detail === "string"
+          ? entry.detail
+          : JSON.stringify(entry.detail, null, 2);
+
+      return `
+        <article class="debug-log-item">
+          <div class="debug-log-head">
+            <strong>${entry.title}</strong>
+            <span>${entry.time}</span>
+          </div>
+          <pre class="debug-log-detail">${detailText}</pre>
+        </article>
+      `;
+    })
+    .join("");
+}
+
+function addDebugLog(title, detail) {
+  const timestamp = new Date().toLocaleTimeString("zh-CN", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+
+  debugLogEntries.push({
+    title,
+    detail,
+    time: timestamp,
+  });
+
+  if (debugLogEntries.length > 60) {
+    debugLogEntries = debugLogEntries.slice(-60);
+  }
+
+  persistDebugLogs();
+  renderDebugLogs();
+}
+
+function clearDebugLogs() {
+  debugLogEntries = [];
+  persistDebugLogs();
+  renderDebugLogs();
+}
+
+async function copyDebugLogs() {
+  const text = debugLogEntries
+    .slice()
+    .reverse()
+    .map((entry) => `[${entry.time}] ${entry.title}\n${typeof entry.detail === "string" ? entry.detail : JSON.stringify(entry.detail, null, 2)}`)
+    .join("\n\n");
+
+  if (!text.trim()) {
+    return;
+  }
+
+  try {
+    await navigator.clipboard.writeText(text);
+    addDebugLog("调试记录复制", "已复制当前开发者模式日志。");
+  } catch (error) {
+    addDebugLog("调试记录复制失败", error instanceof Error ? error.message : "unknown error");
+  }
+}
+
+function getApiBaseForRequest() {
+  return normalizeApiBase(apiBaseInput?.value || getStoredApiBase() || "");
+}
+
+function getAuthHeaders() {
+  const headers = {
+    Accept: "application/json",
+    "Content-Type": "application/json",
+    "X-Debug-Mode": body.dataset.appMode === "developer" ? "1" : "0",
+  };
+
+  if (currentAuthToken) {
+    headers.Authorization = `Bearer ${currentAuthToken}`;
+  }
+
+  return headers;
+}
+
+async function apiJsonRequest(path, options = {}) {
+  const apiBase = getApiBaseForRequest();
+
+  if (!apiBase) {
+    throw new Error("请先填写或确认后端地址。");
+  }
+
+  const response = await fetch(`${apiBase}${path}`, {
+    method: options.method || "GET",
+    headers: {
+      ...getAuthHeaders(),
+      ...(options.headers || {}),
+    },
+    body: options.body ? JSON.stringify(options.body) : undefined,
+  });
+
+  const rawText = await response.text();
+  let data = {};
+
+  try {
+    data = rawText ? JSON.parse(rawText) : {};
+  } catch (error) {
+    data = { raw: rawText };
+  }
+
+  if (!response.ok) {
+    const errorMessage =
+      (data && (data.detail || data.message)) ||
+      `HTTP ${response.status}`;
+    const requestError = new Error(errorMessage);
+    requestError.status = response.status;
+    requestError.data = data;
+    throw requestError;
+  }
+
+  return data;
+}
+
 async function testApiHealth() {
   const apiBase = normalizeApiBase(apiBaseInput?.value || "");
 
@@ -269,8 +481,10 @@ async function testApiHealth() {
 
     const data = await response.json();
     apiStatusText.textContent = `连通成功：${JSON.stringify(data)}`;
+    addDebugLog("后端健康检查成功", data);
   } catch (error) {
     apiStatusText.textContent = `请求失败：${error instanceof Error ? error.message : "unknown error"}`;
+    addDebugLog("后端健康检查失败", error instanceof Error ? error.message : "unknown error");
   }
 }
 
@@ -284,6 +498,21 @@ function openApiResultModal(title, body) {
 function closeApiResultModal() {
   apiResultModal.classList.remove("is-open");
   apiResultModal.setAttribute("aria-hidden", "true");
+}
+
+async function copyApiDebugText() {
+  const debugText = apiResultBody?.textContent || "";
+
+  if (!debugText.trim()) {
+    return;
+  }
+
+  try {
+    await navigator.clipboard.writeText(debugText);
+    apiStatusText.textContent = "调试信息已复制到剪贴板。";
+  } catch (error) {
+    apiStatusText.textContent = "复制失败，请手动选中调试文本复制。";
+  }
 }
 
 function buildApiDebugText({
@@ -376,6 +605,7 @@ async function testApiHealthWithModal() {
         response,
         error: responseText || `HTTP ${response.status}`,
       }));
+      addDebugLog("后端弹窗测试失败", responseText || `HTTP ${response.status}`);
       return;
     }
 
@@ -386,12 +616,14 @@ async function testApiHealthWithModal() {
       response,
       data,
     }));
+    addDebugLog("后端弹窗测试成功", data);
   } catch (error) {
     openApiResultModal("请求失败", buildApiDebugText({
       apiBase,
       requestUrl,
       error,
     }));
+    addDebugLog("后端弹窗测试异常", error instanceof Error ? error.message : "unknown error");
   }
 }
 
@@ -526,6 +758,9 @@ function setAppMode(mode) {
   if (apiTestCard) {
     apiTestCard.setAttribute("aria-hidden", String(nextMode !== "developer"));
   }
+  if (debugLogCard) {
+    debugLogCard.setAttribute("aria-hidden", String(nextMode !== "developer"));
+  }
 
   try {
     window.localStorage.setItem(APP_MODE_STORAGE_KEY, nextMode);
@@ -608,12 +843,150 @@ function initializeApiPanel() {
     const apiBase = normalizeApiBase(apiBaseInput?.value || "");
     saveApiBase(apiBase);
     apiStatusText.textContent = apiBase ? `已保存 API 地址：${apiBase}` : "已清空 API 地址。";
+    addDebugLog("保存后端地址", apiBase || "已清空");
   });
 
   apiHealthButton?.addEventListener("click", testApiHealth);
   apiModalButton?.addEventListener("click", testApiHealthWithModal);
+  apiResultCopy?.addEventListener("click", copyApiDebugText);
   apiResultClose?.addEventListener("click", closeApiResultModal);
   apiResultBackdrop?.addEventListener("click", closeApiResultModal);
+}
+
+function renderAuthState() {
+  if (!authStatusTitle || !authStatusMeta || !authResultText) {
+    return;
+  }
+
+  if (currentAuthUser) {
+    authStatusTitle.textContent = `${currentAuthUser.display_name || currentAuthUser.username}`;
+    authStatusMeta.textContent = `当前用户：${currentAuthUser.username}`;
+    authResultText.textContent = "已登录，可以直接调用需要身份的后端接口。";
+  } else {
+    authStatusTitle.textContent = "未登录";
+    authStatusMeta.textContent = "可以本地注册和登录，服务器也能直接测试。";
+    authResultText.textContent = "等待操作。";
+  }
+}
+
+async function registerUser() {
+  const username = authUsernameInput?.value.trim() || "";
+  const displayName = authDisplayNameInput?.value.trim() || "";
+  const password = authPasswordInput?.value || "";
+
+  authResultText.textContent = "正在注册...";
+  addDebugLog("尝试注册", { username, displayName });
+
+  try {
+    const data = await apiJsonRequest("/api/auth/register", {
+      method: "POST",
+      body: {
+        username,
+        password,
+        display_name: displayName,
+      },
+    });
+
+    currentAuthUser = data.user || null;
+    saveAuthUser(currentAuthUser);
+    renderAuthState();
+    authResultText.textContent = data.message || "注册成功。";
+    addDebugLog("注册成功", data.debug || data);
+  } catch (error) {
+    authResultText.textContent = error.message || "注册失败。";
+    addDebugLog("注册失败", error.data || error.message || "unknown error");
+  }
+}
+
+async function loginUser() {
+  const username = authUsernameInput?.value.trim() || "";
+  const password = authPasswordInput?.value || "";
+
+  authResultText.textContent = "正在登录...";
+  addDebugLog("尝试登录", { username });
+
+  try {
+    const data = await apiJsonRequest("/api/auth/login", {
+      method: "POST",
+      body: {
+        username,
+        password,
+      },
+    });
+
+    currentAuthToken = data.token || "";
+    currentAuthUser = data.user || null;
+    saveAuthToken(currentAuthToken);
+    saveAuthUser(currentAuthUser);
+    renderAuthState();
+    authResultText.textContent = data.message || "登录成功。";
+    addDebugLog("登录成功", data.debug || data);
+  } catch (error) {
+    authResultText.textContent = error.message || "登录失败。";
+    addDebugLog("登录失败", error.data || error.message || "unknown error");
+  }
+}
+
+async function logoutUser() {
+  if (!currentAuthToken) {
+    currentAuthUser = null;
+    saveAuthUser(null);
+    renderAuthState();
+    authResultText.textContent = "当前没有登录会话。";
+    addDebugLog("退出登录", "当前没有登录令牌。");
+    return;
+  }
+
+  authResultText.textContent = "正在退出...";
+  addDebugLog("尝试退出登录", currentAuthUser || "unknown user");
+
+  try {
+    const data = await apiJsonRequest("/api/auth/logout", {
+      method: "POST",
+    });
+
+    currentAuthToken = "";
+    currentAuthUser = null;
+    saveAuthToken("");
+    saveAuthUser(null);
+    renderAuthState();
+    authResultText.textContent = data.message || "已退出登录。";
+    addDebugLog("退出成功", data.debug || data);
+  } catch (error) {
+    authResultText.textContent = error.message || "退出失败。";
+    addDebugLog("退出失败", error.data || error.message || "unknown error");
+  }
+}
+
+async function restoreAuthSession() {
+  currentAuthToken = getStoredAuthToken();
+  currentAuthUser = getStoredAuthUser();
+  renderAuthState();
+
+  if (!currentAuthToken) {
+    return;
+  }
+
+  try {
+    const data = await apiJsonRequest("/api/auth/me");
+    currentAuthUser = data.user || null;
+    saveAuthUser(currentAuthUser);
+    renderAuthState();
+    addDebugLog("恢复登录会话", data.debug || data);
+  } catch (error) {
+    currentAuthToken = "";
+    currentAuthUser = null;
+    saveAuthToken("");
+    saveAuthUser(null);
+    renderAuthState();
+    addDebugLog("恢复登录失败", error.data || error.message || "unknown error");
+  }
+}
+
+function initializeAuthPanel() {
+  authRegisterButton?.addEventListener("click", registerUser);
+  authLoginButton?.addEventListener("click", loginUser);
+  authLogoutButton?.addEventListener("click", logoutUser);
 }
 
 function updateClock() {
@@ -1237,11 +1610,15 @@ function createSegmentControl(container, highlight, buttons, onSelect) {
 initializeTheme();
 initializeAppMode();
 initializeApiPanel();
+loadDebugLogs();
+renderDebugLogs();
+initializeAuthPanel();
 renderQuickLinks();
 updateClock();
 loadMascotQuotes();
 loadGalleryManifest();
 initializeRipples();
+restoreAuthSession();
 
 modeSegmentControl = createSegmentControl(
   modeSwitch,
@@ -1272,6 +1649,8 @@ railDots.forEach((button) => {
   button.addEventListener("click", () => scrollToSection(button.dataset.target));
 });
 searchForm.addEventListener("submit", handleSearch);
+debugLogClearButton?.addEventListener("click", clearDebugLogs);
+debugLogCopyButton?.addEventListener("click", copyDebugLogs);
 searchInput.addEventListener("keydown", markStrongSearchFeedback);
 searchInput.addEventListener("input", triggerSearchInputFeedback);
 storyCard.addEventListener("click", openStoriesPage);
