@@ -6,7 +6,7 @@ const SEARCH_ENGINES = {
 
 const THEME_STORAGE_KEY = "wan-start-page-theme";
 const API_BASE_STORAGE_KEY = "wan-start-page-api-base";
-const DEFAULT_API_BASE = "https://start-page-api.onrender.com";
+const DEFAULT_API_BASE = "";
 
 const QUICK_LINKS = [
   {
@@ -199,11 +199,25 @@ function normalizeApiBase(value) {
   return value.trim().replace(/\/+$/, "");
 }
 
+function getDefaultApiBase() {
+  const { protocol, hostname } = window.location;
+
+  if (hostname === "localhost" || hostname === "127.0.0.1") {
+    return `${protocol}//${hostname}:8000`;
+  }
+
+  if (/^\d+\.\d+\.\d+\.\d+$/.test(hostname)) {
+    return `${protocol}//${hostname}:8000`;
+  }
+
+  return DEFAULT_API_BASE;
+}
+
 function getStoredApiBase() {
   try {
-    return window.localStorage.getItem(API_BASE_STORAGE_KEY) || DEFAULT_API_BASE;
+    return window.localStorage.getItem(API_BASE_STORAGE_KEY) || getDefaultApiBase();
   } catch (error) {
-    return DEFAULT_API_BASE;
+    return getDefaultApiBase();
   }
 }
 
@@ -219,7 +233,7 @@ async function testApiHealth() {
   const apiBase = normalizeApiBase(apiBaseInput?.value || "");
 
   if (!apiBase) {
-    apiStatusText.textContent = "请先填写正式 API 域名。";
+    apiStatusText.textContent = "请先填写或确认后端地址。";
     return;
   }
 
@@ -261,7 +275,7 @@ async function testApiHealthWithModal() {
   const apiBase = normalizeApiBase(apiBaseInput?.value || "");
 
   if (!apiBase) {
-    openApiResultModal("连接失败", "请先填写正式 API 域名。");
+    openApiResultModal("连接失败", "请先填写或确认后端地址。");
     return;
   }
 
