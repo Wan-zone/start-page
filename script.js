@@ -547,7 +547,9 @@ async function apiJsonRequest(path, options = {}) {
     throw new Error("请先填写或确认后端地址。");
   }
 
-  const response = await fetch(`${apiBase}${path}`, {
+  const requestUrl = `${apiBase}${path}`;
+
+  const response = await fetch(requestUrl, {
     method: options.method || "GET",
     headers: {
       ...getAuthHeaders(),
@@ -572,6 +574,8 @@ async function apiJsonRequest(path, options = {}) {
     const requestError = new Error(errorMessage);
     requestError.status = response.status;
     requestError.data = data;
+    requestError.requestUrl = requestUrl;
+    requestError.requestPath = path;
     throw requestError;
   }
 
@@ -584,6 +588,8 @@ async function apiUploadRequest(path, fieldName, file, extraFields = {}) {
   if (!apiBase) {
     throw new Error("请先填写或确认后端地址。");
   }
+
+  const requestUrl = `${apiBase}${path}`;
 
   const formData = new FormData();
   formData.append(fieldName, file);
@@ -600,7 +606,7 @@ async function apiUploadRequest(path, fieldName, file, extraFields = {}) {
     headers.Authorization = `Bearer ${currentAuthToken}`;
   }
 
-  const response = await fetch(`${apiBase}${path}`, {
+  const response = await fetch(requestUrl, {
     method: "POST",
     headers,
     body: formData,
@@ -622,6 +628,8 @@ async function apiUploadRequest(path, fieldName, file, extraFields = {}) {
     const requestError = new Error(errorMessage);
     requestError.status = response.status;
     requestError.data = data;
+    requestError.requestUrl = requestUrl;
+    requestError.requestPath = path;
     throw requestError;
   }
 
@@ -1074,7 +1082,12 @@ async function registerUser() {
     if (authGateResultText) {
       authGateResultText.textContent = error.message || "注册失败。";
     }
-    addDebugLog("注册失败", error.data || error.message || "unknown error");
+    addDebugLog("注册失败", {
+      message: error.message || "unknown error",
+      status: error.status || null,
+      request_url: error.requestUrl || null,
+      response: error.data || null,
+    });
   }
 }
 
@@ -1114,7 +1127,12 @@ async function loginUser() {
     if (authGateResultText) {
       authGateResultText.textContent = error.message || "登录失败。";
     }
-    addDebugLog("登录失败", error.data || error.message || "unknown error");
+    addDebugLog("登录失败", {
+      message: error.message || "unknown error",
+      status: error.status || null,
+      request_url: error.requestUrl || null,
+      response: error.data || null,
+    });
   }
 }
 
