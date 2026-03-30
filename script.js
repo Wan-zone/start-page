@@ -5,6 +5,7 @@ const SEARCH_ENGINES = {
 };
 
 const THEME_STORAGE_KEY = "wan-start-page-theme";
+const API_BASE_STORAGE_KEY = "wan-start-page-api-base";
 
 const QUICK_LINKS = [
   {
@@ -152,6 +153,10 @@ const quickLinksGrid = document.getElementById("quickLinksGrid");
 const engineSwitch = document.querySelector(".engine-switch");
 const engineHighlight = engineSwitch.querySelector(".segment-highlight");
 const enginePills = document.querySelectorAll(".engine-pill");
+const apiBaseInput = document.getElementById("apiBaseInput");
+const apiSaveButton = document.getElementById("apiSaveButton");
+const apiHealthButton = document.getElementById("apiHealthButton");
+const apiStatusText = document.getElementById("apiStatusText");
 const galleryFrame = document.getElementById("galleryFrame");
 const galleryPrevButton = document.getElementById("galleryPrevButton");
 const galleryZoomButton = document.getElementById("galleryZoomButton");
@@ -182,6 +187,56 @@ let searchInputFeedbackTimer = 0;
 let previousSearchValue = "";
 let pendingSearchFeedbackType = "typing";
 let mascotLines = [];
+
+function normalizeApiBase(value) {
+  return value.trim().replace(/\/+$/, "");
+}
+
+function getStoredApiBase() {
+  try {
+    return window.localStorage.getItem(API_BASE_STORAGE_KEY) || "";
+  } catch (error) {
+    return "";
+  }
+}
+
+function saveApiBase(value) {
+  try {
+    window.localStorage.setItem(API_BASE_STORAGE_KEY, value);
+  } catch (error) {
+    // Ignore storage failures and keep the UI usable.
+  }
+}
+
+async function testApiHealth() {
+  const apiBase = normalizeApiBase(apiBaseInput?.value || "");
+
+  if (!apiBase) {
+    apiStatusText.textContent = "请先填写 Quick Tunnel 或 API 域名。";
+    return;
+  }
+
+  apiStatusText.textContent = "正在测试 /health ...";
+
+  try {
+    const response = await fetch(`${apiBase}/health`, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      apiStatusText.textContent = `连通失败：HTTP ${response.status}`;
+      return;
+    }
+
+    const data = await response.json();
+    apiStatusText.textContent = `连通成功：${JSON.stringify(data)}`;
+  } catch (error) {
+    apiStatusText.textContent = `请求失败：${error instanceof Error ? error.message : "unknown error"}`;
+  }
+}
 
 const FALLBACK_MASCOT_LINES = [
   "请对社恐角色温柔一点。",
@@ -340,6 +395,26 @@ function initializeTheme() {
   }
 
   setTheme("dark");
+}
+
+function initializeApiPanel() {
+  const storedApiBase = getStoredApiBase();
+
+  if (apiBaseInput) {
+    apiBaseInput.value = storedApiBase;
+  }
+
+  if (storedApiBase) {
+    apiStatusText.textContent = `当前 API：${storedApiBase}`;
+  }
+
+  apiSaveButton?.addEventListener("click", () => {
+    const apiBase = normalizeApiBase(apiBaseInput?.value || "");
+    saveApiBase(apiBase);
+    apiStatusText.textContent = apiBase ? `已保存 API 地址：${apiBase}` : "已清空 API 地址。";
+  });
+
+  apiHealthButton?.addEventListener("click", testApiHealth);
 }
 
 function updateClock() {
@@ -961,6 +1036,7 @@ function createSegmentControl(container, highlight, buttons, onSelect) {
 }
 
 initializeTheme();
+initializeApiPanel();
 renderQuickLinks();
 updateClock();
 loadMascotQuotes();

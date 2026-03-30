@@ -89,6 +89,34 @@
             <button class="engine-pill" type="button" data-engine="bing">Bing</button>
             <button class="engine-pill" type="button" data-engine="baidu">Baidu</button>
           </div>
+
+          <article class="glass-card api-test-card">
+            <div class="section-heading compact">
+              <div>
+                <p class="eyebrow">API LINK</p>
+                <h2>后端连通测试</h2>
+              </div>
+              <p class="section-copy">先填 Quick Tunnel，后面再切固定域名。</p>
+            </div>
+
+            <div class="api-test-form">
+              <label class="sr-only" for="apiBaseInput">API Base</label>
+              <input
+                id="apiBaseInput"
+                type="url"
+                inputmode="url"
+                placeholder="https://example.trycloudflare.com"
+                autocomplete="off"
+              />
+
+              <div class="api-test-actions">
+                <button id="apiSaveButton" class="subtle-button" type="button">保存地址</button>
+                <button id="apiHealthButton" class="primary-button" type="button">测试 /health</button>
+              </div>
+            </div>
+
+            <p id="apiStatusText" class="api-status-text">尚未配置 API 地址。</p>
+          </article>
         </section>
 
         <section class="links-panel" id="shortcutsSection">
