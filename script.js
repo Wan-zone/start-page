@@ -215,7 +215,15 @@ function getDefaultApiBase() {
 
 function getStoredApiBase() {
   try {
-    return window.localStorage.getItem(API_BASE_STORAGE_KEY) || getDefaultApiBase();
+    const storedValue = window.localStorage.getItem(API_BASE_STORAGE_KEY) || "";
+    const normalizedValue = normalizeApiBase(storedValue);
+
+    // 旧的云后端地址不再作为默认值沿用，改回当前主机自托管后端。
+    if (normalizedValue.includes(".onrender.com")) {
+      return getDefaultApiBase();
+    }
+
+    return normalizedValue || getDefaultApiBase();
   } catch (error) {
     return getDefaultApiBase();
   }
