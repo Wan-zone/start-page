@@ -188,6 +188,9 @@ const authLogoutButton = document.getElementById("authLogoutButton");
 const authResultText = document.getElementById("authResultText");
 const authGateModal = document.getElementById("authGateModal");
 const authGateResultText = document.getElementById("authGateResultText");
+const authGateDebug = document.getElementById("authGateDebug");
+const authGateDebugBody = document.getElementById("authGateDebugBody");
+const authGateDebugCopy = document.getElementById("authGateDebugCopy");
 const debugLogCard = document.getElementById("debugLogCard");
 const debugLogList = document.getElementById("debugLogList");
 const debugLogClearButton = document.getElementById("debugLogClearButton");
@@ -233,6 +236,7 @@ let currentUserSettings = {
   email: "",
   signature: "",
 };
+let currentAuthDebugText = "";
 
 function normalizeApiBase(value) {
   return value.trim().replace(/\/+$/, "");
@@ -428,12 +432,26 @@ function openAuthGate(message = "") {
   if (message && authGateResultText) {
     authGateResultText.textContent = message;
   }
+  currentAuthDebugText = "";
+  if (authGateDebug) {
+    authGateDebug.hidden = true;
+  }
+  if (authGateDebugBody) {
+    authGateDebugBody.textContent = "";
+  }
 }
 
 function closeAuthGate(message = "") {
   setAuthGateLocked(false);
   if (message && authGateResultText) {
     authGateResultText.textContent = message;
+  }
+  currentAuthDebugText = "";
+  if (authGateDebug) {
+    authGateDebug.hidden = true;
+  }
+  if (authGateDebugBody) {
+    authGateDebugBody.textContent = "";
   }
 }
 
@@ -692,6 +710,56 @@ async function copyApiDebugText() {
     apiStatusText.textContent = "调试信息已复制到剪贴板。";
   } catch (error) {
     apiStatusText.textContent = "复制失败，请手动选中调试文本复制。";
+  }
+}
+
+async function copyAuthDebugText() {
+  if (!currentAuthDebugText) {
+    return;
+  }
+
+  try {
+    await navigator.clipboard.writeText(currentAuthDebugText);
+    authGateResultText && (authGateResultText.textContent = "认证调试信息已复制。");
+  } catch (error) {
+    authGateResultText && (authGateResultText.textContent = "复制认证调试信息失败。");
+    addDebugLog("认证调试复制失败", error instanceof Error ? error.message : "unknown error");
+  }
+}
+
+function showAuthDebug(title, payload) {
+  const lines = [
+    title,
+    `页面地址: ${window.location.href}`,
+    `页面来源: ${window.location.origin}`,
+    `后端地址: ${getApiBaseForRequest() || "(empty)"}`,
+  ];
+
+  if (payload?.request_url) {
+    lines.push(`请求地址: ${payload.request_url}`);
+  }
+  if (payload?.status) {
+    lines.push(`HTTP 状态: ${payload.status}`);
+  }
+  if (payload?.message) {
+    lines.push(`错误信息: ${payload.message}`);
+  }
+  if (payload?.response) {
+    lines.push("");
+    lines.push("返回内容:");
+    try {
+      lines.push(JSON.stringify(payload.response, null, 2));
+    } catch (error) {
+      lines.push(String(payload.response));
+    }
+  }
+
+  currentAuthDebugText = lines.join("\n");
+  if (authGateDebugBody) {
+    authGateDebugBody.textContent = currentAuthDebugText;
+  }
+  if (authGateDebug) {
+    authGateDebug.hidden = false;
   }
 }
 
@@ -1031,6 +1099,7 @@ function initializeApiPanel() {
   apiResultCopy?.addEventListener("click", copyApiDebugText);
   apiResultClose?.addEventListener("click", closeApiResultModal);
   apiResultBackdrop?.addEventListener("click", closeApiResultModal);
+  authGateDebugCopy?.addEventListener("click", copyAuthDebugText);
 }
 
 function renderAuthState() {
@@ -1082,12 +1151,14 @@ async function registerUser() {
     if (authGateResultText) {
       authGateResultText.textContent = error.message || "注册失败。";
     }
-    addDebugLog("注册失败", {
+    const payload = {
       message: error.message || "unknown error",
       status: error.status || null,
       request_url: error.requestUrl || null,
       response: error.data || null,
-    });
+    };
+    showAuthDebug("注册失败", payload);
+    addDebugLog("注册失败", payload);
   }
 }
 
@@ -1127,12 +1198,14 @@ async function loginUser() {
     if (authGateResultText) {
       authGateResultText.textContent = error.message || "登录失败。";
     }
-    addDebugLog("登录失败", {
+    const payload = {
       message: error.message || "unknown error",
       status: error.status || null,
       request_url: error.requestUrl || null,
       response: error.data || null,
-    });
+    };
+    showAuthDebug("登录失败", payload);
+    addDebugLog("登录失败", payload);
   }
 }
 

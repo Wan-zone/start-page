@@ -1120,6 +1120,42 @@ body[data-app-mode="user"] .developer-only-card {
   margin-top: 18px;
 }
 
+.auth-gate-debug {
+  margin-top: 16px;
+  padding: 14px 16px;
+  border-radius: 22px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.04)),
+    rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px) saturate(145%);
+  -webkit-backdrop-filter: blur(20px) saturate(145%);
+}
+
+.auth-gate-debug-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+  color: var(--text-faint);
+  font-size: 0.8rem;
+  letter-spacing: 0.16em;
+}
+
+.auth-gate-debug-body {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font: 500 0.9rem/1.6 "SFMono-Regular", "JetBrains Mono", "Fira Code", monospace;
+  color: var(--text-main);
+  user-select: text;
+  -webkit-user-select: text;
+}
+
 .debug-log-list {
   display: grid;
   gap: 12px;
